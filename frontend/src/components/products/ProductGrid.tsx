@@ -1,5 +1,5 @@
-import { ProductSummary } from '@/types/api';
-import ProductCard from './ProductCard';
+import { ProductSummary } from "@/types/api";
+import ProductCard from "./ProductCard";
 
 interface ProductGridProps {
   products: ProductSummary[];
@@ -18,7 +18,7 @@ export default function ProductGrid({ products, title }: ProductGridProps) {
   return (
     <section className="py-6">
       {title && (
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 tracking-tight">
+        <h2 className="text-2xl font-bold text-gunmetal mb-6 tracking-tight">
           {title}
         </h2>
       )}
