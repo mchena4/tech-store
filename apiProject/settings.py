@@ -27,10 +27,7 @@ load_dotenv(BASE_DIR / '.env')
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
+DEBUG = True    
 
 # Application definition
 
@@ -180,6 +177,14 @@ REDIRECT_URL = os.environ.get('REDIRECT_URL')
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    REDIRECT_URL
 ]
-CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.dev']
+
+if REDIRECT_URL:
+    ALLOWED_HOSTS.append(REDIRECT_URL)
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'http://localhost:3000', 
+    'https://*.ngrok-free.dev',
+]

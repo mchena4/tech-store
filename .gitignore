@@ -9,3 +9,9 @@ wheels/
 # Virtual environments
 .venv
 .env
+
+# dbsqlite
+/db.sqlite3
+
+# Static & Media
+staticfiles/
