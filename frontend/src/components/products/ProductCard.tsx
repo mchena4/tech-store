@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ShoppingCart } from "lucide-react";
 import { ProductSummary } from "@/types/api";
 import { useCartStore } from "@/store/useCartStore";
+import { getProductImageUrl } from "@/lib/images";
 
 interface ProductCardProps {
   product: ProductSummary;
@@ -23,19 +24,17 @@ export default function ProductCard({ product }: ProductCardProps) {
     }
   };
 
+  const imageUrl = getProductImageUrl(product.image);
+
   return (
     <div className="group bg-white rounded-2xl border border-gunmetal/10 shadow-sm hover:border-ocean-mist/40 hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden">
       <Link
         href={`/products/${product.slug}`}
         className="relative block aspect-square bg-ocean-mist/5 overflow-hidden"
       >
-        {product.image ? (
+        {imageUrl ? (
           <img
-            src={
-              product.image.startsWith("http")
-                ? product.image
-                : `http://127.0.0.1:8000${product.image}`
-            }
+            src={imageUrl}
             alt={product.name}
             className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
           />
@@ -45,6 +44,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
         )}
       </Link>
+
 
       <div className="p-4 flex flex-col flex-grow">
         <Link href={`/products/${product.slug}`} className="block mb-2">
