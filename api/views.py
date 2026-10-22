@@ -253,16 +253,27 @@ def create_mercadopago_preference(request):
 
     sdk = mercadopago.SDK(settings.MERCADOPAGO_ACCESS_TOKEN)
 
+    # Resolve frontend and backend URLs with scheme
+    frontend_base = getattr(settings, 'FRONTEND_URL', None) or getattr(settings, 'REDIRECT_URL', 'http://localhost:3000')
+    if not frontend_base.startswith(('http://', 'https://')):
+        frontend_base = f"https://{frontend_base}"
+    frontend_base = frontend_base.rstrip('/')
+
+    backend_base = getattr(settings, 'BACKEND_URL', None) or getattr(settings, 'REDIRECT_URL', 'http://localhost:8000')
+    if not backend_base.startswith(('http://', 'https://')):
+        backend_base = f"https://{backend_base}"
+    backend_base = backend_base.rstrip('/')
+
     preference_data = {
             "items": items_data,
             "back_urls": {
-                "success": f"{settings.REDIRECT_URL}/pago-exitoso",
-                "failure": f"{settings.REDIRECT_URL}/pago-fallido",
-                "pending": f"{settings.REDIRECT_URL}/pago-pendiente"
+                "success": f"{frontend_base}/pago-exitoso",
+                "failure": f"{frontend_base}/pago-fallido",
+                "pending": f"{frontend_base}/pago-pendiente"
             },
             "auto_return": "approved",
             "external_reference": cart.cart_code,
-            "notification_url": f"{settings.REDIRECT_URL}/webhook/mercadopago/", 
+            "notification_url": f"{backend_base}/webhook/mercadopago/", 
         }
     try:
         preference_response = sdk.preference().create(preference_data)
@@ -326,19 +337,23 @@ def mercadopago_webhook(request):
                             send_order_confirmation_mail(order)
                             
                         except Cart.DoesNotExist:
-                            return Response({"message": f"ERROR: The cart with the code: '{cart_code}' does not exist in the database."}, status=status.HTTP_404_NOT_FOUND)
+                            # If cart doesn't exist, check if order was already processed
+                            if Order.objects.filter(order_code=cart_code).exists():
+                                return Response({"message": "Order already processed."}, status=status.HTTP_200_OK)
+                            return Response({"message": f"ERROR: The cart with the code: '{cart_code}' does not exist."}, status=status.HTTP_404_NOT_FOUND)
                         except Exception as e:
                             return Response({"message": f"ERROR creating the order: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 else:
-                    return Response({"message": "IGNORED: An order with this payment ID already exists."}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({"message": "IGNORED: An order with this payment ID already exists."}, status=status.HTTP_200_OK)
             else:
-                return Response({"message": f"IGNORED: Payment status is not 'approved'. Is '{payment_status}'"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"message": f"IGNORED: Payment status is not 'approved'. Is '{payment_status}'"}, status=status.HTTP_200_OK)
         else:
             return Response({"message": "ERROR: The payment could not be queried via the Mercado Pago API."}, status=status.HTTP_400_BAD_REQUEST)
     else:
-        return Response({"message": "IGNORED: It is not a payment event or the ID is missing."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": "IGNORED: Not a payment event or ID is missing."}, status=status.HTTP_200_OK)
 
     return Response({"message": "Notification received"}, status=status.HTTP_200_OK)
+
 
 
 @api_view(["GET"])
