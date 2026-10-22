@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import { useCartStore } from "@/store/useCartStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { getProductImageUrl } from "@/lib/images";
+
 
 export default function CartPage() {
   const { cart, loading, fetchCart, updateQuantity, removeItem } =
@@ -78,15 +80,12 @@ export default function CartPage() {
                   <div className="w-20 h-20 bg-ocean-mist/5 rounded-xl overflow-hidden shrink-0 border border-gunmetal/10">
                     {item.product?.image ? (
                       <img
-                        src={
-                          item.product.image.startsWith("http")
-                            ? item.product.image
-                            : `http://127.0.0.1:8000${item.product.image}`
-                        }
+                        src={getProductImageUrl(item.product.image)}
                         alt={item.product.name}
                         className="w-full h-full object-cover"
                       />
                     ) : (
+
                       <div className="w-full h-full flex items-center justify-center text-xs text-gunmetal/40">
                         Sin imagen
                       </div>

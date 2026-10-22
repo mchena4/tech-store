@@ -14,6 +14,8 @@ import api from "@/lib/axios";
 import { useCartStore } from "@/store/useCartStore";
 import WishlistButton from "@/components/products/WishlistButton";
 import ReviewSection from "@/components/reviews/ReviewSection";
+import { getProductImageUrl } from "@/lib/images";
+
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -73,11 +75,8 @@ export default function ProductDetailPage({ params }: PageProps) {
     );
   }
 
-  const imageUrl = product.image
-    ? product.image.startsWith("http")
-      ? product.image
-      : `http://127.0.0.1:8000${product.image}`
-    : null;
+  const imageUrl = getProductImageUrl(product.image);
+
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
