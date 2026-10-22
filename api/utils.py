@@ -9,7 +9,7 @@ def send_order_confirmation_mail(order):
     # Build the HTML content for the email
     items_html = ""
     for item in order.items.all():
-        items_html += f"<li>{item.quantity} x <strong>{item.product.name}<strong> - ${item.price} </li>"
+        items_html += f"<li>{item.quantity} x <strong>{item.product.name}</strong> - ${item.price}</li>"
 
     html_content = f"""
     <div style="font-family: sans-serif; max-width: 600px; margin: auto;">
@@ -31,12 +31,18 @@ def send_order_confirmation_mail(order):
     # Convert HTML content to plain text for email clients that do not support HTML
     text_content = strip_tags(html_content)
 
+    to_email = getattr(order.user, 'email', None)
+    if not to_email:
+        return f"Warning: No email address found for user {order.user.username}"
+
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or getattr(settings, 'EMAIL_HOST_USER', None)
+
     # Create the email message
     email = EmailMultiAlternatives(
         subject=subject,
         body=text_content,
-        from_email=settings.EMAIL_HOST_USER,
-        to=order.user.email
+        from_email=from_email,
+        to=[to_email]
     )
 
     # Attach the HTML content to the email
@@ -45,6 +51,6 @@ def send_order_confirmation_mail(order):
     # Send the email
     try:
         email.send()
-        return f"Email sent successfully to {order.user.email}"
+        return f"Email sent successfully to {to_email}"
     except Exception as e:
-        return f"Error sending email to {order.user.email}: {str(e)}"
+        return f"Error sending email to {to_email}: {str(e)}"
