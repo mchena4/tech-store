@@ -86,7 +86,7 @@ class ProductSpecification(models.Model):
         return f"{self.product.name} - {self.specification.name}: {self.value}"
 
 class Cart(models.Model):
-    cart_code = models.CharField(max_length=11, unique=True)
+    cart_code = models.CharField(max_length=30, unique=True)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
